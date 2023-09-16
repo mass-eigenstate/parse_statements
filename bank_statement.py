@@ -1,7 +1,13 @@
+#
+#  From the python standard library
+#
 import sys
 import re
 import datetime
 from pathlib import Path
+#
+#  Not from the python standard library
+#
 from PyPDF2 import PdfReader
 
 #
@@ -31,8 +37,30 @@ def main(argv):
             ## print(page.extract_text())
 
     list_lines = lines.split("\n")
+    transactions = analyze_PNC_checking(list_lines)
+    for trans in transactions:
+        print(trans)
+#
+#  Functions 
+#
+#
+#  Check that filenames passed to the program exist. Return those that are good.
+#
+def validate_input(list):
+    good_files = [] 
+    for filename in list:
+        if Path(filename).is_file():
+            good_files.append(filename)
+
+    return good_files
+#
+# Different statements need different types of analysis. This function does PNC
+# checking. 
+#
+def analyze_PNC_checking(list_lines):
+    transactions = []
     #
-    #   Find the statement period in the form of two dates
+    # Get the beginning and end dates tha the statement covers. 
     #
     for line in list_lines:
         #print(line)
@@ -67,6 +95,7 @@ def main(argv):
             #  in December will have different years for December and January
             #  dates.
             #
+            #
             if start_date.month == 12: 
                 year = start_date.year
             else: 
@@ -86,20 +115,13 @@ def main(argv):
             if type == 0: 
                 print (f"Unable to determine transaction type: {trans_desc}")
             trans_amount = type*trans_amount
-            print(f" Date: {trans_date} Amount: {trans_amount:9.2f} Description: {trans_desc}")
-
+            transactions.append(("PNC checking", trans_date, trans_amount,
+                                 trans_desc))
         elif re.search(r"^Daily Balance", line):
             break                               # There are no more transactions after Daily Balance
+    return transactions
 #
-#  Check that filenames passed to the program exist. Return those that are good.
-#
-def validate_input(list):
-    good_files = [] 
-    for filename in list:
-        if Path(filename).is_file():
-            good_files.append(filename)
 
-    return good_files
 #
 #   Parse a date string in the form mm/dd/yyyy and return a datetime.date object.
 #
