@@ -9,7 +9,6 @@ from pathlib import Path
 #  Not from the python standard library
 #
 from PyPDF2 import PdfReader
-
 #
 # Regex for a month date at the beginning of a line /^[0-1][0-9]\/[0-3][0-9]
 #
@@ -73,7 +72,7 @@ def analyze_PNC_checking(list_lines):
             break
     
     start_date = date_from_string(start_string)
-    end_date = date_from_string(end_string)
+    end_dat = date_from_string(end_string)
     # print(f"Start date: {start_date} End date: {end_date}")
     #
     #   Find the lines with transactions 
@@ -84,8 +83,12 @@ def analyze_PNC_checking(list_lines):
                   r"Direct Payment", r"Online.* Pmt", r"Ret Dep Item", 
                   r"POS Purchase", r"Fee", r"Zel To", r"Recurring Debit Card",
                   r"E-Check Check Pymt"]
-    for line in list_lines:
-        #print(f"{line} ") 
+    #
+    #  I need an indexed loop here since I have to check if the transaction
+    #  continues to the next line. 
+    #
+    for i in range(0,len(list_lines)-1):
+        line = list_lines[i]
         transaction = re.search(r"^([0-1][0-9])/([0-3][0-9]) (([0-9]{1,3},?)+\.[0-9][0-9])(.*)$", line)
         if transaction: 
             month = int(transaction.group(1))
@@ -103,6 +106,14 @@ def analyze_PNC_checking(list_lines):
             trans_date = datetime.date(year, month, day)
             trans_amount = float(transaction.group(3).replace(",",""))
             trans_desc = transaction.group(5)
+            #
+            #  Determine if the description extends to the next line.
+            #
+            next_line = list_lines[i+1]
+            next_trans = re.search(r"^([0-1][0-9])/([0-3][0-9]) (([0-9]{1,3},?)+\.[0-9][0-9])(.*)$", next_line)
+            #            print(f" Next line: {next_line} next_trans: {next_trans}" )
+            if next_trans == None:
+                trans_desc += next_line
             #
             #  Determine the type of transaction either deposit or withdrawal
             #
