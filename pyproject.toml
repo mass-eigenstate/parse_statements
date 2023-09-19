@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "parse-statements"
+version = "0.1.0"
+description = "Parses bank statements and adds the transactions to a database"
+authors = ["Mike Procario <procario@gmail.com>"]
+license = "None"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+PyPDF2 = "^3.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
