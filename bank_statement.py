@@ -15,8 +15,9 @@ from PyPDF2 import PdfReader
 # Regex for a number with , separating evry three digits and two digits after
 # the decimla point
 #                    ([0-9]{1,3},?)+\.[0-9][0-9]
-#  
+#
 def main(argv):
+
 
     file_list = []
     lines = ""
@@ -40,13 +41,15 @@ def main(argv):
     for trans in transactions:
         print(trans)
 #
-#  Functions 
+#  Functions
 #
 #
 #  Check that filenames passed to the program exist. Return those that are good.
 #
 def validate_input(list):
-    good_files = [] 
+
+
+    good_files = []
     for filename in list:
         if Path(filename).is_file():
             good_files.append(filename)
@@ -54,65 +57,62 @@ def validate_input(list):
     return good_files
 #
 # Different statements need different types of analysis. This function does PNC
-# checking. 
+# checking.
 #
 def analyze_PNC_checking(list_lines):
+
+
     transactions = []
     #
     # Get the beginning and end dates tha the statement covers. 
     #
     for line in list_lines:
-        #print(line)
         period = re.search(r"(\d{2}/\d{2}/20\d{2}) to(\d{2}/\d{2}/20\d{2})", line)
-        #print(period)
         if period:
             start_string = period.group(1)
             end_string = period.group(2)
-            # print(f"Start date: {start_string} End date: {end_string}")
             break
-    
+
     start_date = date_from_string(start_string)
-    end_dat = date_from_string(end_string)
-    # print(f"Start date: {start_date} End date: {end_date}")
+    end_date = date_from_string(end_string)
     #
-    #   Find the lines with transactions 
+    #   Find the lines with transactions
     #
-    dep_types = [r"Deposit", r"Interest Payment", r"Transfer From", 
-                 r"Surcharge Reimbursement", r"Debit Card Credit"] 
+    dep_types = [r"Deposit", r"Interest Payment", r"Transfer From",
+                 r"Surcharge Reimbursement", r"Debit Card Credit"]
     with_types = [r"Web Pmt", r"Transfer To", r"Card Purchase", r"Withdrawal",
-                  r"Direct Payment", r"Online.* Pmt", r"Ret Dep Item", 
+                  r"Direct Payment", r"Online.* Pmt", r"Ret Dep Item",
                   r"POS Purchase", r"Fee", r"Zel To", r"Recurring Debit Card",
                   r"E-Check Check Pymt"]
     #
     #  I need an indexed loop here since I have to check if the transaction
-    #  continues to the next line. 
+    #  continues to the next line.
     #
-    for i in range(0,len(list_lines)-1):
+    for i in range(0, len(list_lines)-1):
         line = list_lines[i]
         transaction = re.search(r"^([0-1][0-9])/([0-3][0-9]) (([0-9]{1,3},?)+\.[0-9][0-9])(.*)$", line)
-        if transaction: 
+        if transaction:
             month = int(transaction.group(1))
             day = int(transaction.group(2))
             #
-            #  Only the month and date is provided. Statements with a start_date
-            #  in December will have different years for December and January
-            #  dates.
+            #  Only the month and date is provided. Statements with a
+            #  start_date in December will have different years for December
+            #  and January dates.
             #
             #
-            if start_date.month == 12: 
+            if start_date.month == 12:
                 year = start_date.year
-            else: 
+            else:
                 year = end_date.year
             trans_date = datetime.date(year, month, day)
-            trans_amount = float(transaction.group(3).replace(",",""))
+            trans_amount = float(transaction.group(3).replace(",", ""))
             trans_desc = transaction.group(5)
             #
             #  Determine if the description extends to the next line.
             #
             next_line = list_lines[i+1]
             next_trans = re.search(r"^([0-1][0-9])/([0-3][0-9]) (([0-9]{1,3},?)+\.[0-9][0-9])(.*)$", next_line)
-            #            print(f" Next line: {next_line} next_trans: {next_trans}" )
-            if next_trans == None:
+            if next_trans is None:
                 trans_desc += next_line
             #
             #  Determine the type of transaction either deposit or withdrawal
@@ -120,9 +120,11 @@ def analyze_PNC_checking(list_lines):
             # print(f"Amount: {transaction.group(3)}")
             type = 0 
             for dt in dep_types:
-                if re.search(dt, trans_desc): type = 1
+                if re.search(dt, trans_desc):
+                    type = 1
             for wt in with_types:
-                if re.search(wt, trans_desc): type = -1 
+                if re.search(wt, trans_desc):
+                    type = -1 
             if type == 0: 
                 print (f"Unable to determine transaction type: {trans_desc}")
             trans_amount = type*trans_amount
@@ -132,11 +134,11 @@ def analyze_PNC_checking(list_lines):
             break                               # There are no more transactions after Daily Balance
     return transactions
 #
-
-#
 #   Parse a date string in the form mm/dd/yyyy and return a datetime.date object.
 #
 def date_from_string(string):
+
+
     dateparts = re.search(r"(\d{2})/(\d{2})/(\d{4})", string)
     if dateparts:
         year = int(dateparts.group(3))      # Datetime accepts integer arguments.
@@ -146,6 +148,7 @@ def date_from_string(string):
     else:
         return None
 
-if __name__ == "__main__": 
-    main(sys.argv)
+if __name__ == "__main__":
 
+
+    main(sys.argv)
