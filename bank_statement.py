@@ -22,9 +22,9 @@ def main(argv):
     file_list = []
     lines = ""
     if len(argv) == 1:
-    #
-    #  No files were passed
-    #     
+        #
+        #  No files were passed
+        #
         print("No files given to analyze. Analyzing the example.\n")
         file_list.append("example.pdf")
     elif len(argv) > 1:
@@ -32,9 +32,9 @@ def main(argv):
 
     for filename in file_list: 
         reader = PdfReader(filename)
-        for page in reader.pages:  ## pages is a list like object
+        for page in reader.pages:  # pages is a list like object
             lines += page.extract_text()
-            ## print(page.extract_text())
+            # print(page.extract_text())
 
     list_lines = lines.split("\n")
     transactions = analyze_PNC_checking(list_lines)
@@ -46,8 +46,9 @@ def main(argv):
 #
 #  Check that filenames passed to the program exist. Return those that are good.
 #
-def validate_input(list):
 
+
+def validate_input(list):
 
     good_files = []
     for filename in list:
@@ -59,12 +60,13 @@ def validate_input(list):
 # Different statements need different types of analysis. This function does PNC
 # checking.
 #
-def analyze_PNC_checking(list_lines):
 
+
+def analyze_PNC_checking(list_lines):
 
     transactions = []
     #
-    # Get the beginning and end dates tha the statement covers. 
+    # Get the beginning and end dates tha the statement covers.
     #
     for line in list_lines:
         period = re.search(r"(\d{2}/\d{2}/20\d{2}) to(\d{2}/\d{2}/20\d{2})", line)
@@ -126,29 +128,29 @@ def analyze_PNC_checking(list_lines):
                 if re.search(wt, trans_desc):
                     type = -1 
             if type == 0: 
-                print (f"Unable to determine transaction type: {trans_desc}")
+                print(f"Unable to determine transaction type: {trans_desc}")
             trans_amount = type*trans_amount
             transactions.append(("PNC checking", trans_date, trans_amount,
                                  trans_desc))
         elif re.search(r"^Daily Balance", line):
-            break                               # There are no more transactions after Daily Balance
+            break          # There are no more transactions after Daily Balance
     return transactions
 #
-#   Parse a date string in the form mm/dd/yyyy and return a datetime.date object.
+#   Parse a date string in the form mm/dd/yyyy & return a datetime.date object.
 #
+
+
 def date_from_string(string):
-
-
     dateparts = re.search(r"(\d{2})/(\d{2})/(\d{4})", string)
     if dateparts:
-        year = int(dateparts.group(3))      # Datetime accepts integer arguments.
+        year = int(dateparts.group(3))    # Datetime accepts integer arguments.
         month = int(dateparts.group(1))
         day = int(dateparts.group(2))
         return datetime.date(year, month, day)
     else:
         return None
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
 
     main(sys.argv)
