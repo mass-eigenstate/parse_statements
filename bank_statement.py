@@ -16,8 +16,9 @@ from PyPDF2 import PdfReader
 # the decimla point
 #                    ([0-9]{1,3},?)+\.[0-9][0-9]
 #
-def main(argv):
 
+
+def main(argv):
 
     file_list = []
     lines = ""
@@ -30,7 +31,7 @@ def main(argv):
     elif len(argv) > 1:
         file_list = validate_input(argv[1:])
 
-    for filename in file_list: 
+    for filename in file_list:
         reader = PdfReader(filename)
         for page in reader.pages:  # pages is a list like object
             lines += page.extract_text()
@@ -44,7 +45,7 @@ def main(argv):
 #  Functions
 #
 #
-#  Check that filenames passed to the program exist. Return those that are good.
+#  Check that filenames passed to program exist. Return those that are good.
 #
 
 
@@ -69,7 +70,8 @@ def analyze_PNC_checking(list_lines):
     # Get the beginning and end dates tha the statement covers.
     #
     for line in list_lines:
-        period = re.search(r"(\d{2}/\d{2}/20\d{2}) to(\d{2}/\d{2}/20\d{2})", line)
+        period = re.search(r"(\d{2}/\d{2}/20\d{2}) to(\d{2}/\d{2}/20\d{2})",
+                           line)
         if period:
             start_string = period.group(1)
             end_string = period.group(2)
@@ -120,14 +122,14 @@ def analyze_PNC_checking(list_lines):
             #  Determine the type of transaction either deposit or withdrawal
             #
             # print(f"Amount: {transaction.group(3)}")
-            type = 0 
+            type = 0
             for dt in dep_types:
                 if re.search(dt, trans_desc):
                     type = 1
             for wt in with_types:
                 if re.search(wt, trans_desc):
-                    type = -1 
-            if type == 0: 
+                    type = -1
+            if type == 0:
                 print(f"Unable to determine transaction type: {trans_desc}")
             trans_amount = type*trans_amount
             transactions.append(("PNC checking", trans_date, trans_amount,
